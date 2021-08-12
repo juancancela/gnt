@@ -1,0 +1,30 @@
+{
+  "name": "gnt-app",
+  "version": "1.0.0",
+  "description": "gnt app",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": "12.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juancancela/gnt.git"
+  },
+  "author": "Juan Carlos Cancela <cancela.juancarlos@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/juancancela/gnt/issues"
+  },
+  "homepage": "https://github.com/juancancela/gnt#readme",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "lodash": "^4.17.21",
+    "node-fetch": "^2.6.1"
+  }
+}
