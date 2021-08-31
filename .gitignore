@@ -105,3 +105,6 @@ dist
 
 # App files
 public/*
+
+# generated reports
+mochawesome-report

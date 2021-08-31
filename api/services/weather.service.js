@@ -1,41 +1,55 @@
-const fetch = require('node-fetch')
-const _ = require('lodash')
+require("isomorphic-fetch");
+const _ = require("lodash");
 
-const { weatherServiceBaseUrl } = require('../../props');
-const locationsUrl = query => `${weatherServiceBaseUrl}/location/search/?query=${query}`
-const weatherConditionsUrl = id => `${weatherServiceBaseUrl}/location/${id}`
+const { get, insert } = require("../repositories/weather.repository");
+const { retrieve } = require("../utils/http.utils");
+const { weatherServiceBaseUrl } = require("../../props");
 
-const Service = module.exports
+const locationsUrl = (query) =>
+  `${weatherServiceBaseUrl}/location/search/?query=${query}`;
 
-Service.getWeatherCondition = async (query = '') => {
-    try {
-        const locations = await getLocations(query)
-        if (_.isEmpty(locations))
-            return []
+const weatherConditionsUrl = (id) => `${weatherServiceBaseUrl}/location/${id}`;
 
-        const { woeid, title } = locations[0]
+const Service = module.exports;
 
-        let { consolidated_weather } =
-            await (await fetch(weatherConditionsUrl(woeid))).json()
-
-        if (_.isEmpty(consolidated_weather))
-            return []
-
-        return {
-            name: title,
-            weather: consolidated_weather[0]
-        }
-    } catch (e) {
-        throw new Error(`[service::weather::getWeatherCondition] Failed to obtain weather conditions for query: ${query}. Error: `, e)
+Service.getWeatherCondition = async (query = "") => {
+  try {
+    const locations = await getLocations(query);
+    if (_.isEmpty(locations)) {
+      throw new Error(
+        `[service::weather::getWeatherCondition] there is no locations matching the provided query`
+      );
     }
-}
+    const { woeid, title } = locations[0];
+    let weather = await get(woeid);
 
-const getLocations = async (query = '') => {
-    try {
-        const locations = await fetch(locationsUrl(query))
-        return await locations.json()
-    } catch (e) {
-        throw new Error(`[service::weather::getLocations] Failed to obtain locations using query: ${query}. Error: `, e)
+    if (!weather) {
+      let { consolidated_weather } = await (
+        await fetch(weatherConditionsUrl(woeid))
+      ).json();
+
+      if (!consolidated_weather) {
+        throw new Error(
+          `[service::weather::getWeatherCondition] there is no weather information for the given location`
+        );
+      }
+
+      const { the_temp, min_temp, max_temp, humidity, weather_state_abbr } = consolidated_weather[0];
+      weather = { woeid, the_temp, min_temp, max_temp, humidity, weather_state_abbr };
+      
+      await insert(weather);
     }
-}
 
+    return {
+      name: title,
+      weather,
+    };
+  } catch (e) {
+    throw new Error(
+      `[service::weather::getWeatherCondition] Failed to obtain weather conditions for query: ${query}. Error: `,
+      e.message
+    );
+  }
+};
+
+const getLocations = async (query = "") => await retrieve(locationsUrl(query));

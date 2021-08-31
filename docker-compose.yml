@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:9.6
+    environment:
+      POSTGRES_HOST: localhost
+      POSTGRES_DB: gnt_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    ports:
+      - 5432:5432
